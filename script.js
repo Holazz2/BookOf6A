@@ -130,3 +130,69 @@ window.onload = function() {
     renderPosts();
   }
 };
+
+// Periksa Status Login di Home Page
+if (window.location.pathname === '/home.html') {
+  const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+  if (!loggedInUser) {
+    alert('Anda harus login terlebih dahulu!');
+    window.location.href = 'index.html'; // Redirect ke halaman login
+  } else {
+    document.querySelector('header h1').textContent = `Welcome, ${loggedInUser.username}!`;
+  }
+}
+
+// Periksa Status Login di Home Page
+if (window.location.pathname === '/home.html') {
+  const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+  if (!loggedInUser) {
+    alert('Anda harus login terlebih dahulu!');
+    window.location.href = 'index.html'; // Redirect ke halaman login
+  } else {
+    document.querySelector('header h1').textContent = `Welcome, ${loggedInUser.username}!`;
+  }
+}
+
+
+// Cek apakah user sudah login di home.html
+if (window.location.pathname === '/home.html') {
+  const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+
+  if (!loggedInUser) {
+    alert('Anda harus login terlebih dahulu!');
+    window.location.href = 'index.html'; // Redirect ke halaman login
+  } else {
+    document.querySelector('header h1').textContent = `Welcome, ${loggedInUser.username}!`;
+  }
+}
+
+// Logout Function
+function logoutUser() {
+  localStorage.removeItem('loggedInUser');
+  alert('Anda telah logout.');
+  window.location.href = 'index.html'; // Redirect ke halaman login
+}
+
+// Periksa apakah pengguna sudah login
+const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+if (!loggedInUser) {
+    window.location.href = '/login.html'; // Redirect ke halaman login jika belum login
+}
+
+// Fungsi untuk mengambil postingan dari server
+fetch('/get_posts')
+    .then(response => response.json())
+    .then(posts => {
+        posts.forEach(post => {
+            const postDiv = document.createElement('div');
+            postDiv.classList.add('post');
+            postDiv.innerHTML = `
+                <p><strong>${post.username}</strong></p>
+                <img src="${post.image_url}" alt="Post Image" />
+                <p>${post.caption}</p>
+                <p>Likes: ${post.likes_count} | Comments: ${post.comments_count}</p>
+            `;
+            document.getElementById('posts-container').appendChild(postDiv);
+        });
+    })
+    .catch(error => console.error('Error fetching posts:', error));};

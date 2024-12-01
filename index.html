@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Social Media Punya 6A</title>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    header {
+      background-color: #333;
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .form-group input,
+    .form-group button,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .form-group button {
+      background-color: #333;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    .form-group button:hover {
+      background-color: #555;
+    }
+
+    .post {
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+    }
+
+    .post img {
+      max-width: 100%;
+      display: block;
+      margin: 10px 0;
+      border-radius: 8px;
+    }
+
+    .post-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .post-actions button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      color: #555;
+    }
+
+    .post-actions button:hover {
+      color: #333;
+    }
+
+    .post-actions span {
+      font-size: 14px;
+      color: #777;
+    }
+
+    #uploadSection {
+      display: none;
+    }
+
+    .reply-section {
+      margin-top: 10px;
+      border-left: 2px solid #ddd;
+      padding-left: 10px;
+    }
+
+    .reply {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Book Of 6A</h1>
+  </header>
+
+  <div class="container" id="authSection">
+    <h2>Login / Register</h2>
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" id="username" placeholder="Enter username" />
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Enter password" />
+    </div>
+    <div class="form-group">
+      <button onclick="login()">Login / Register</button>
+    </div>
+  </div>
+
+  <div class="container" id="uploadSection">
+    <h2>Welcome, <span id="userDisplay"></span></h2>
+    <div class="form-group">
+      <label for="content">Post something (message or image):</label>
+      <textarea id="content" placeholder="Write a message"></textarea>
+    </div>
+    <div class="form-group">
+      <label for="imageUpload">Upload Image</label>
+      <input type="file" id="imageUpload" accept="image/*">
+    </div>
+    <div class="form-group">
+      <button onclick="uploadPost()">Upload</button>
+    </div>
+
+    <h3>Posts</h3>
+    <div id="postList"></div>
+  </div>
+
+  <script>
+    let currentUser = null;
+    const posts = [];
+
+    function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      if (!username || !password) {
+        alert('Please fill in both fields!');
+        return;
+      }
+
+      currentUser = username;
+      document.getElementById('userDisplay').innerText = currentUser;
+      document.getElementById('authSection').style.display = 'none';
+      document.getElementById('uploadSection').style.display = 'block';
+    }
+
+    function uploadPost() {
+      const content = document.getElementById('content').value;
+      const imageFile = document.getElementById('imageUpload').files[0];
+
+      if (!content && !imageFile) {
+        alert('Please write something or upload an image!');
+        return;
+      }
+
+      const newPost = {
+        id: posts.length + 1,
+        username: currentUser,
+        content: content,
+        image: imageFile ? URL.createObjectURL(imageFile) : null,
+        likes: 0,
+        replies: []
+      };
+
+      posts.push(newPost);
+      renderPosts();
+      document.getElementById('content').value = '';
+      document.getElementById('imageUpload').value = '';
+    }
+
+    function renderPosts() {
+      const postList = document.getElementById('postList');
+      postList.innerHTML = '';
+
+      posts.forEach(post => {
+        const postDiv = document.createElement('div');
+        postDiv.className = 'post';
+
+        postDiv.innerHTML = `
+          <h4>${post.username}</h4>
+          <p>${post.content}</p>
+          ${post.image ? `<img src="${post.image}" alt="User upload">` : ''}
+          <div class="post-actions">
+            <button onclick="likePost(${post.id})">
+              <i class="fas fa-thumbs-up"></i> Like
+            </button>
+            <span>Likes: ${post.likes}</span>
+            <button onclick="replyToPost(${post.id})">
+              <i class="fas fa-reply"></i> Reply
+            </button>
+            <span>Replies: ${post.replies.length}</span>
+          </div>
+          <div class="reply-section" id="replies-${post.id}">
+            ${post.replies.map(reply => `<div class="reply"><strong>${reply.user}:</strong> ${reply.message}</div>`).join('')}
+          </div>
+        `;
+
+        postList.appendChild(postDiv);
+      });
+    }
+
+    function likePost(postId) {
+      const post = posts.find(p => p.id === postId);
+      post.likes++;
+      renderPosts();
+    }
+
+    function replyToPost(postId) {
+      const replyMessage = prompt('Enter your reply:');
+      if (replyMessage) {
+        const post = posts.find(p => p.id === postId);
+        post.replies.push({ user: currentUser, message: replyMessage });
+        renderPosts();
+      }
+    }
+  </script>
+</body>
+</html>
